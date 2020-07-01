@@ -1,15 +1,15 @@
-# Python: Sonarr Client
+# Python: Radarr Client
 
-Asynchronous Python client for Sonarr API.
+Asynchronous Python client for Radarr API.
 
 ## About
 
-This package allows you to monitor a Sonarr instance.
+This package allows you to monitor a Radarr instance.
 
 ## Installation
 
 ```bash
-pip install sonarr
+pip install radarr
 ```
 
 ## Usage
@@ -17,29 +17,29 @@ pip install sonarr
 ```python
 import asyncio
 
-from sonarr import Sonarr
+from radarr import Radarr
 
 
 async def main():
-    """Show example of connecting to your Sonarr instance."""
-    async with Sonarr("192.168.1.100", "API_TOKEN") as sonarr:
+    """Show example of connecting to your Radarr instance."""
+    async with Radarr("192.168.1.100", "API_TOKEN") as radarr:
         # basic: simple api for monitoring purposes only.
-        info = await sonarr.update()
+        info = await radarr.update()
         print(info)
 
-        calendar = await sonarr.calendar()
+        calendar = await radarr.calendar()
         print(calendar)
 
-        commands = await sonarr.commands()
+        commands = await radarr.commands()
         print(commands)
 
-        queue = await sonarr.queue()
+        queue = await radarr.queue()
         print(queue)
 
-        series = await sonarr.series()
+        series = await radarr.series()
         print(series)
 
-        wanted = await sonarr.wanted()
+        wanted = await radarr.wanted()
         print(wanted)
 
 

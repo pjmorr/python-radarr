@@ -1,11 +1,11 @@
-"""Tests for Sonarr Models."""
+"""Tests for Radarr Models."""
 import json
 from datetime import datetime, timezone
 from typing import List
 
 import pytest
-import sonarr.models as models
-from sonarr import SonarrError
+import radarr.models as models
+from radarr import RadarrError
 
 from . import load_fixture
 
@@ -36,7 +36,7 @@ def test_application() -> None:
 
 def test_application_no_data() -> None:
     """Test the Device model."""
-    with pytest.raises(SonarrError):
+    with pytest.raises(RadarrError):
         models.Application({})
 
 
@@ -57,7 +57,7 @@ def test_info() -> None:
     info = models.Info.from_dict(INFO)
 
     assert info
-    assert info.app_name == "Sonarr"
+    assert info.app_name == "Radarr"
     assert info.version == "2.0.0.1121"
 
 

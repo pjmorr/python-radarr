@@ -1,10 +1,10 @@
-"""Models for Sonarr."""
+"""Models for Radarr."""
 
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional
 
-from .exceptions import SonarrError
+from .exceptions import RadarrError
 
 
 def dt_str_to_dt(dt_str: str) -> datetime:
@@ -32,7 +32,7 @@ def dt_str_to_dt(dt_str: str) -> datetime:
 
 @dataclass(frozen=True)
 class Disk:
-    """Object holding disk information from Sonarr."""
+    """Object holding disk information from Radarr."""
 
     label: str
     path: str
@@ -41,7 +41,7 @@ class Disk:
 
     @staticmethod
     def from_dict(data: dict):
-        """Return Disk object from Sonarr API response."""
+        """Return Disk object from Radarr API response."""
         return Disk(
             label=data.get("label", ""),
             path=data.get("path", ""),
@@ -52,7 +52,7 @@ class Disk:
 
 @dataclass(frozen=True)
 class Season:
-    """Object holding season information from Sonarr."""
+    """Object holding season information from Radarr."""
 
     number: int
     monitored: bool
@@ -64,7 +64,7 @@ class Season:
 
     @staticmethod
     def from_dict(data: dict):
-        """Return Season object from Sonarr API response."""
+        """Return Season object from Radarr API response."""
         stats = data.get("statistics", {})
 
         return Season(
@@ -80,7 +80,7 @@ class Season:
 
 @dataclass(frozen=True)
 class Series:
-    """Object holding series information from Sonarr."""
+    """Object holding series information from Radarr."""
 
     tvdb_id: int
     series_id: int
@@ -105,7 +105,7 @@ class Series:
 
     @staticmethod
     def from_dict(data: dict):
-        """Return Series object from Sonarr API response."""
+        """Return Series object from Radarr API response."""
         premiere = data.get("firstAired", None)
         if premiere is not None:
             premiere = dt_str_to_dt(premiere)
@@ -154,7 +154,7 @@ class Series:
 
 @dataclass(frozen=True)
 class Episode:
-    """Object holding episode information from Sonarr."""
+    """Object holding episode information from Radarr."""
 
     tvdb_id: int
     episode_id: int
@@ -171,7 +171,7 @@ class Episode:
 
     @staticmethod
     def from_dict(data: dict):
-        """Return Episode object from Sonarr API response."""
+        """Return Episode object from Radarr API response."""
         airs = data.get("airDateUtc", None)
         if airs is not None:
             airs = dt_str_to_dt(airs)
@@ -198,20 +198,20 @@ class Episode:
 
 @dataclass(frozen=True)
 class Info:
-    """Object holding information from Sonarr."""
+    """Object holding information from Radarr."""
 
     app_name: str
     version: str
 
     @staticmethod
     def from_dict(data: dict):
-        """Return Info object from Sonarr API response."""
-        return Info(app_name="Sonarr", version=data.get("version", "Unknown"))
+        """Return Info object from Radarr API response."""
+        return Info(app_name="Radarr", version=data.get("version", "Unknown"))
 
 
 @dataclass(frozen=True)
 class CommandItem:
-    """Object holding command item information from Sonarr."""
+    """Object holding command item information from Radarr."""
 
     command_id: int
     name: int
@@ -226,7 +226,7 @@ class CommandItem:
 
     @staticmethod
     def from_dict(data: dict):
-        """Return CommandItem object from Sonarr API response."""
+        """Return CommandItem object from Radarr API response."""
         if "started" in data:
             started = data.get("started", None)
         else:
@@ -263,7 +263,7 @@ class CommandItem:
 
 @dataclass(frozen=True)
 class QueueItem:
-    """Object holding queue item information from Sonarr."""
+    """Object holding queue item information from Radarr."""
 
     queue_id: int
     download_id: str
@@ -279,7 +279,7 @@ class QueueItem:
 
     @staticmethod
     def from_dict(data: dict):
-        """Return QueueItem object from Sonarr API response."""
+        """Return QueueItem object from Radarr API response."""
         episode_data = data.get("episode", {})
         episode_data["series"] = data.get("series", {})
 
@@ -306,7 +306,7 @@ class QueueItem:
 
 @dataclass(frozen=True)
 class SeriesItem:
-    """Object holding series item information from Sonarr."""
+    """Object holding series item information from Radarr."""
 
     series: Series
     seasons: List[Season]
@@ -317,7 +317,7 @@ class SeriesItem:
 
     @staticmethod
     def from_dict(data: dict):
-        """Return QueueItem object from Sonarr API response."""
+        """Return QueueItem object from Radarr API response."""
         seasons = [Season.from_dict(season) for season in data.get("seasons", [])]
 
         return SeriesItem(
@@ -332,7 +332,7 @@ class SeriesItem:
 
 @dataclass(frozen=True)
 class WantedResults:
-    """Object holding wanted episode results from Sonarr."""
+    """Object holding wanted episode results from Radarr."""
 
     page: int
     per_page: int
@@ -343,7 +343,7 @@ class WantedResults:
 
     @staticmethod
     def from_dict(data: dict):
-        """Return WantedResults object from Sonarr API response."""
+        """Return WantedResults object from Radarr API response."""
         episodes = [Episode.from_dict(episode) for episode in data.get("records", [])]
 
         return WantedResults(
@@ -357,20 +357,20 @@ class WantedResults:
 
 
 class Application:
-    """Object holding all information of the Sonarr Application."""
+    """Object holding all information of the Radarr Application."""
 
     info: Info
     disks: List[Disk] = []
 
     def __init__(self, data: dict):
-        """Initialize an empty Sonarr application class."""
+        """Initialize an empty Radarr application class."""
         # Check if all elements are in the passed dict, else raise an Error
         if any(k not in data for k in ["info"]):
-            raise SonarrError("Sonarr data is incomplete, cannot construct object")
+            raise RadarrError("Radarr data is incomplete, cannot construct object")
         self.update_from_dict(data)
 
     def update_from_dict(self, data: dict) -> "Application":
-        """Return Application object from Sonarr API response."""
+        """Return Application object from Radarr API response."""
         if "info" in data and data["info"]:
             self.info = Info.from_dict(data["info"])
 

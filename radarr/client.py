@@ -1,4 +1,4 @@
-"""Asynchronous Python client for Sonarr."""
+"""Asynchronous Python client for Radarr."""
 import asyncio
 import json
 from socket import gaierror as SocketGIAError
@@ -10,15 +10,15 @@ from yarl import URL
 
 from .__version__ import __version__
 from .exceptions import (
-    SonarrAccessRestricted,
-    SonarrConnectionError,
-    SonarrError,
-    SonarrResourceNotFound,
+    RadarrAccessRestricted,
+    RadarrConnectionError,
+    RadarrError,
+    RadarrResourceNotFound,
 )
 
 
 class Client:
-    """Main class for handling connections with Sonarr API."""
+    """Main class for handling connections with Radarr API."""
 
     def __init__(
         self,
@@ -46,7 +46,7 @@ class Client:
         self.user_agent = user_agent
 
         if user_agent is None:
-            self.user_agent = f"PythonSonarr/{__version__}"
+            self.user_agent = f"PythonRadarr/{__version__}"
 
         if self.base_path[-1] != "/":
             self.base_path += "/"
@@ -86,21 +86,21 @@ class Client:
                     ssl=self.verify_ssl,
                 )
         except asyncio.TimeoutError as exception:
-            raise SonarrConnectionError(
+            raise RadarrConnectionError(
                 "Timeout occurred while connecting to API"
             ) from exception
         except (aiohttp.ClientError, SocketGIAError) as exception:
-            raise SonarrConnectionError(
+            raise RadarrConnectionError(
                 "Error occurred while communicating with API"
             ) from exception
 
         if response.status == 403:
-            raise SonarrAccessRestricted(
+            raise RadarrAccessRestricted(
                 "Access restricted. Please ensure valid API Key is provided", {}
             )
 
         if response.status == 404:
-            raise SonarrResourceNotFound("Resource not found")
+            raise RadarrResourceNotFound("Resource not found")
 
         content_type = response.headers.get("Content-Type", "")
 
@@ -109,11 +109,11 @@ class Client:
             response.close()
 
             if content_type == "application/json":
-                raise SonarrError(
+                raise RadarrError(
                     f"HTTP {response.status}", json.loads(content.decode("utf8"))
                 )
 
-            raise SonarrError(
+            raise RadarrError(
                 f"HTTP {response.status}",
                 {
                     "content-type": content_type,

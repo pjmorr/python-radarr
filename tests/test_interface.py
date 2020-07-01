@@ -1,10 +1,10 @@
-"""Tests for Sonarr."""
+"""Tests for Radarr."""
 from typing import List
 
 import pytest
-import sonarr.models as models
+import radarr.models as models
 from aiohttp import ClientSession
-from sonarr import Sonarr
+from radarr import Radarr
 
 from . import load_fixture
 
@@ -18,8 +18,8 @@ MATCH_HOST = f"{HOST}:{PORT}"
 @pytest.mark.asyncio
 async def test_loop():
     """Test loop usage is handled correctly."""
-    async with Sonarr(HOST, API_KEY) as sonarr:
-        assert isinstance(sonarr, Sonarr)
+    async with Radarr(HOST, API_KEY) as radarr:
+        assert isinstance(radarr, Radarr)
 
 
 @pytest.mark.asyncio
@@ -48,7 +48,7 @@ async def test_app(aresponses):
     )
 
     async with ClientSession() as session:
-        client = Sonarr(HOST, API_KEY, session=session)
+        client = Radarr(HOST, API_KEY, session=session)
         await client.update()
 
         assert client.app
@@ -71,7 +71,7 @@ async def test_calendar(aresponses):
     )
 
     async with ClientSession() as session:
-        client = Sonarr(HOST, API_KEY, session=session)
+        client = Radarr(HOST, API_KEY, session=session)
         response = await client.calendar("2014-01-26", "2014-01-27")
 
         assert response
@@ -96,7 +96,7 @@ async def test_commands(aresponses):
     )
 
     async with ClientSession() as session:
-        client = Sonarr(HOST, API_KEY, session=session)
+        client = Radarr(HOST, API_KEY, session=session)
         response = await client.commands()
 
         assert response
@@ -121,7 +121,7 @@ async def test_command_status(aresponses):
     )
 
     async with ClientSession() as session:
-        client = Sonarr(HOST, API_KEY, session=session)
+        client = Radarr(HOST, API_KEY, session=session)
         response = await client.command_status(368630)
 
         assert response
@@ -143,7 +143,7 @@ async def test_queue(aresponses):
     )
 
     async with ClientSession() as session:
-        client = Sonarr(HOST, API_KEY, session=session)
+        client = Radarr(HOST, API_KEY, session=session)
         response = await client.queue()
 
         assert response
@@ -170,7 +170,7 @@ async def test_series(aresponses):
     )
 
     async with ClientSession() as session:
-        client = Sonarr(HOST, API_KEY, session=session)
+        client = Radarr(HOST, API_KEY, session=session)
         response = await client.series()
 
         assert response
@@ -225,7 +225,7 @@ async def test_update(aresponses):
     )
 
     async with ClientSession() as session:
-        client = Sonarr(HOST, API_KEY, session=session)
+        client = Radarr(HOST, API_KEY, session=session)
         response = await client.update()
 
         assert response
@@ -255,7 +255,7 @@ async def test_wanted(aresponses):
     )
 
     async with ClientSession() as session:
-        client = Sonarr(HOST, API_KEY, session=session)
+        client = Radarr(HOST, API_KEY, session=session)
         response = await client.wanted()
 
         assert response

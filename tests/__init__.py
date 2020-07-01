@@ -1,4 +1,4 @@
-"""Tests for Sonarr."""
+"""Tests for Radarr."""
 import os
 
 

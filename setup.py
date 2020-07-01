@@ -10,7 +10,7 @@ from setuptools import find_packages, setup
 def get_version():
     """Get current version from code."""
     regex = r"__version__\s=\s\"(?P<version>[\d\.]+?)\""
-    path = ("sonarr", "__version__.py")
+    path = ("radarr", "__version__.py")
     return re.search(regex, read(*path)).group("version")
 
 
@@ -39,17 +39,17 @@ setup(
         "Programming Language :: Python :: 3",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    description="Asynchronous Python client for the Sonarr API.",
+    description="Asynchronous Python client for the Radarr API.",
     include_package_data=True,
     install_requires=list(val.strip() for val in open("requirements.txt")),
-    keywords=["sonarr", "api", "async", "client"],
+    keywords=["radarr", "api", "async", "client"],
     license="MIT license",
     long_description_content_type="text/markdown",
     long_description=readme,
-    name="sonarr",
-    packages=find_packages(include=["sonarr"]),
+    name="radarr",
+    packages=find_packages(include=["radarr"]),
     test_suite="tests",
-    url="https://github.com/ctalkington/python-sonarr",
+    url="https://github.com/ctalkington/python-radarr",
     version=get_version(),
     zip_safe=False,
 )

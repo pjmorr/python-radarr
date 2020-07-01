@@ -1,10 +1,10 @@
-"""Asynchronous Python client for Sonarr."""
+"""Asynchronous Python client for Radarr."""
 from typing import List, Optional
 
 from aiohttp.client import ClientSession
 
 from .client import Client
-from .exceptions import SonarrError
+from .exceptions import RadarrError
 from .models import (
     Application,
     CommandItem,
@@ -15,7 +15,7 @@ from .models import (
 )
 
 
-class Sonarr(Client):
+class Radarr(Client):
     """Main class for Python API."""
 
     _application: Optional[Application] = None
@@ -32,7 +32,7 @@ class Sonarr(Client):
         verify_ssl: bool = True,
         user_agent: str = None,
     ) -> None:
-        """Initialize connection with Sonarr."""
+        """Initialize connection with Radarr."""
         super().__init__(
             host=host,
             api_key=api_key,
@@ -55,7 +55,7 @@ class Sonarr(Client):
         if self._application is None or full_update:
             status = await self._request("system/status")
             if status is None:
-                raise SonarrError("Sonarr returned an empty API status response")
+                raise RadarrError("Radarr returned an empty API status response")
 
             diskspace = await self._request("diskspace")
 
@@ -127,7 +127,7 @@ class Sonarr(Client):
 
         return WantedResults.from_dict(results)
 
-    async def __aenter__(self) -> "Sonarr":
+    async def __aenter__(self) -> "Radarr":
         """Async enter."""
         return self
 

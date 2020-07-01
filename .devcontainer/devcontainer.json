@@ -1,5 +1,5 @@
 {
-	"name": "Python Sonarr Dev",
+	"name": "Python Radarr Dev",
 	"context": "..",
 	"dockerFile": "../Dockerfile.dev",
 	"settings": {
