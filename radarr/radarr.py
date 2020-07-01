@@ -8,9 +8,8 @@ from .exceptions import RadarrError
 from .models import (
     Application,
     CommandItem,
-    Episode,
+    Movie,
     QueueItem,
-    SeriesItem,
     WantedResults,
 )
 
@@ -66,7 +65,7 @@ class Radarr(Client):
         self._application.update_from_dict({"diskspace": diskspace})
         return self._application
 
-    async def calendar(self, start: str = None, end: str = None) -> List[Episode]:
+    async def calendar(self, start: str = None, end: str = None) -> List[Movie]:
         """Get upcoming episodes.
 
         If start/end are not supplied, episodes airing
@@ -81,8 +80,7 @@ class Radarr(Client):
             params["end"] = str(end)
 
         results = await self._request("calendar", params=params)
-
-        return [Episode.from_dict(result) for result in results]
+        return [Movie.from_dict(result) for result in results]
 
     async def commands(self) -> List[CommandItem]:
         """Query the status of all currently started commands."""
@@ -101,12 +99,6 @@ class Radarr(Client):
         results = await self._request("queue")
 
         return [QueueItem.from_dict(result) for result in results]
-
-    async def series(self) -> List[SeriesItem]:
-        """Return all series."""
-        results = await self._request("series")
-
-        return [SeriesItem.from_dict(result) for result in results]
 
     async def wanted(
         self,

@@ -22,32 +22,42 @@ pip install radarr
 import asyncio
 
 from radarr import Radarr
+import calendar
+from datetime import datetime
 
 
 async def main():
     """Show example of connecting to your Radarr instance."""
-    async with Radarr("192.168.1.100", "API_TOKEN") as radarr:
+    async with Radarr("192.168.1.100", "API_KEY", port=7878) as radarr:
         # basic: simple api for monitoring purposes only.
         info = await radarr.update()
-        print(info)
+        print(f"Update Info:\n{info.info}")
+        print("\n--- Calendar ---")
+        today = datetime.today()
+        cal_range = calendar.monthrange(today.year, today.month)
+        cal_start = datetime(today.year, today.month, 1).strftime('%Y-%m-%dT%H:%M:%SZ')
+        cal_end = datetime(today.year, 8, cal_range[1]).strftime('%Y-%m-%dT%H:%M:%SZ')
+        print(cal_start, cal_end)
+        cal = await radarr.calendar(start=cal_start, end=cal_end)
+        [print(f"{movie.title} -- Downloaded: {movie.downloaded} \
+- InCinemas: {movie.in_cinimas} - ReleaseDate: {movie.physical_release} \
+- Wanted: {movie.wanted}") for movie in cal]
 
-        calendar = await radarr.calendar()
-        print(calendar)
-
+        print('\n--- Running Commands ---')
         commands = await radarr.commands()
         print(commands)
 
-        queue = await radarr.queue()
-        print(queue)
+        print('\n--- Movies in Queue ---')
+        queue_items = await radarr.queue()
+        [print(f"{queue.movie.title} ({queue.movie.year}) - Download: {queue.title} - Status: {queue.status} \
+- DownloadStatus: {queue.download_status}") for queue in queue_items]
 
-        series = await radarr.series()
-        print(series)
-
-        wanted = await radarr.wanted()
-        print(wanted)
+        print('\n--- Wanted Movies ---')
+        wanteds = await radarr.wanted()
+        [print(f"{wanted.title} -- InCinemas: {wanted.in_cinimas} \
+- ReleaseDate: {wanted.physical_release}") for wanted in wanteds.movies]
 
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-```

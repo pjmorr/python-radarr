@@ -1,32 +1,33 @@
 """Models for Radarr."""
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, date
 from typing import List, Optional
 
 from .exceptions import RadarrError
 
 
-def dt_str_to_dt(dt_str: str) -> datetime:
+def dt_str_to_d(dt_str: str) -> date:
     """Convert ISO-8601 datetime string to datetime object."""
-    utc = False
+    # utc = True if "Z" in dt_str else False
+    # if Python doesn't support long microsecond values
+    # dt_str = dt_str[:-1] if utc else dt_str
+    # ts_bits = dt_str.split(".", 1)
+    # dt_str = "{}.{}".format(ts_bits[0], ts_bits[1][:2])
+    # dt_str = f"{dt_str}Z" if utc else dt_str
+    # fmt = "%Y-%m-%dT%H:%M:%S.%f" if "." in dt_str else "%Y-%m-%dT%H:%M:%S"
 
-    if "Z" in dt_str:
-        utc = True
-        dt_str = dt_str[:-1]
+    # fmt = f"{fmt}%z" if utc else fmt
+    dt_str = dt_str.split("T")[0]
+    return date.fromisoformat(dt_str)
 
-    if "." in dt_str:
-        # Python doesn't support long microsecond values
-        ts_bits = dt_str.split(".", 1)
-        dt_str = "{}.{}".format(ts_bits[0], ts_bits[1][:2])
-        fmt = "%Y-%m-%dT%H:%M:%S.%f"
-    else:
-        fmt = "%Y-%m-%dT%H:%M:%S"
 
-    if utc:
-        dt_str += "Z"
-        fmt += "%z"
+def dt_str_to_dt(dt_str: str) -> date:
+    """Convert ISO-8601 datetime string to datetime object."""
+    utc = True if "Z" in dt_str else False
+    fmt = "%Y-%m-%dT%H:%M:%S.%f" if "." in dt_str else "%Y-%m-%dT%H:%M:%S"
 
+    fmt = f"{fmt}%z" if utc else fmt
     return datetime.strptime(dt_str, fmt)
 
 
@@ -51,148 +52,62 @@ class Disk:
 
 
 @dataclass(frozen=True)
-class Season:
-    """Object holding season information from Radarr."""
-
-    number: int
-    monitored: bool
-    downloaded: int = 0
-    episodes: int = 0
-    total_episodes: int = 0
-    progress: int = 0
-    diskspace: int = 0
-
-    @staticmethod
-    def from_dict(data: dict):
-        """Return Season object from Radarr API response."""
-        stats = data.get("statistics", {})
-
-        return Season(
-            number=data.get("seasonNumber", 0),
-            monitored=data.get("monitored", False),
-            downloaded=stats.get("episodeFileCount", 0),
-            episodes=stats.get("episodeCount", 0),
-            total_episodes=stats.get("totalEpisodeCount", 0),
-            progress=stats.get("percentOfEpisodes", 0),
-            diskspace=stats.get("sizeOnDisk", 0),
-        )
-
-
-@dataclass(frozen=True)
-class Series:
-    """Object holding series information from Radarr."""
-
-    tvdb_id: int
-    series_id: int
-    series_type: str
-    slug: str
-    status: str
-    title: str
-    seasons: int
-    overview: str
-    certification: str
-    genres: List[str]
-    network: str
-    runtime: int
-    timeslot: str
-    year: int
-    premiere: datetime
-    path: str
-    poster: Optional[str]
-    monitored: bool
-    added: datetime
-    synced: datetime
-
-    @staticmethod
-    def from_dict(data: dict):
-        """Return Series object from Radarr API response."""
-        premiere = data.get("firstAired", None)
-        if premiere is not None:
-            premiere = dt_str_to_dt(premiere)
-
-        added = data.get("added", None)
-        if added is not None:
-            added = dt_str_to_dt(added)
-
-        synced = data.get("lastInfoSync", None)
-        if synced is not None:
-            synced = dt_str_to_dt(synced)
-
-        poster = None
-        for image in data.get("images", []):
-            if "poster" not in image["coverType"]:
-                continue
-
-            if "remoteUrl" in image:
-                poster = image["remoteUrl"]
-            else:
-                poster = image["url"]
-
-        return Series(
-            tvdb_id=data.get("tvdbId", 0),
-            series_id=data.get("id", 0),
-            series_type=data.get("seriesType", "unknown"),
-            slug=data.get("titleSlug", ""),
-            status=data.get("status", "unknown"),
-            title=data.get("title", ""),
-            seasons=data.get("seasonCount", 0),
-            overview=data.get("overview", ""),
-            certification=data.get("certification", "None"),
-            genres=data.get("genres", []),
-            network=data.get("network", "Unknown"),
-            runtime=data.get("runtime", 0),
-            timeslot=data.get("airTime", ""),
-            year=data.get("year", 0),
-            premiere=premiere,
-            path=data.get("path", ""),
-            poster=poster,
-            added=added,
-            synced=synced,
-            monitored=data.get("monitored", False),
-        )
-
-
-@dataclass(frozen=True)
-class Episode:
+class Movie:
     """Object holding episode information from Radarr."""
 
-    tvdb_id: int
-    episode_id: int
-    episode_number: int
-    season_number: int
-    identifier: str
+    imdb_id: int
+    tmdb_id: int
     title: str
+    sort_title: str
+    clean_title: str
+    year: int
     overview: str
-    airdate: str
-    airs: datetime
+    in_cinimas: date
+    physical_release: date
+    status: str
     downloaded: bool
     downloading: bool
-    series: Series
+    wanted: bool
+    has_file: bool
+    path: str
+    folder_name: str
+    monitored: bool
+    is_available: bool
+    ratings: dict
 
     @staticmethod
     def from_dict(data: dict):
         """Return Episode object from Radarr API response."""
-        airs = data.get("airDateUtc", None)
-        if airs is not None:
-            airs = dt_str_to_dt(airs)
+        in_cinemas = data.get("inCinemas", None)
+        in_cinemas = dt_str_to_d(in_cinemas) if in_cinemas else None
 
-        episode_number = data.get("episodeNumber", 0)
-        season_number = data.get("seasonNumber", 0)
-        identifier = f"S{season_number:02d}E{episode_number:02d}"
+        physical_release = data.get('physicalRelease', None)
+        physical_release = dt_str_to_d(physical_release) if physical_release else None
 
-        return Episode(
-            tvdb_id=data.get("tvDbEpisodeId", 0),
-            episode_id=data.get("id", 0),
-            episode_number=episode_number,
-            season_number=season_number,
-            identifier=identifier,
-            title=data.get("title", ""),
-            overview=data.get("overview", ""),
-            airdate=data.get("airDate", ""),
-            airs=airs,
-            downloaded=data.get("hasFile", False),
+        downloaded: bool = data.get('downloaded', False)
+        monitored: bool = data.get('monitored', False)
+        wanted = True if not downloaded and monitored else False
+
+        return Movie(
+            imdb_id=data.get('imdbid'),
+            tmdb_id=data.get('tmdbid'),
+            title=data.get('title'),
+            sort_title=data.get('sortTitle'),
+            clean_title=data.get('cleanTitle'),
+            year=data.get('year'),
+            overview=data.get('overview'),
+            in_cinimas=in_cinemas,
+            physical_release=physical_release,
+            status=data.get('stats'),
+            downloaded=downloaded,
             downloading=data.get("downloading", False),
-            series=Series.from_dict(data.get("series", {})),
+            wanted=wanted,
+            has_file=data.get('hasFile', False),
+            path=data.get('path'),
+            folder_name=data.get('folderName'),
+            monitored=monitored,
+            is_available=data.get('isAvailable', False),
+            ratings=data.get('ratings', {})
         )
 
 
@@ -269,7 +184,7 @@ class QueueItem:
     download_id: str
     download_status: str
     title: str
-    episode: Episode
+    movie: Movie
     protocol: str
     size_remaining: int
     size: int
@@ -280,10 +195,9 @@ class QueueItem:
     @staticmethod
     def from_dict(data: dict):
         """Return QueueItem object from Radarr API response."""
-        episode_data = data.get("episode", {})
-        episode_data["series"] = data.get("series", {})
+        movie_data = data.get("movie", {})
 
-        episode = Episode.from_dict(episode_data)
+        movie = Movie.from_dict(movie_data)
 
         eta = data.get("estimatedCompletionTime", None)
         if eta is not None:
@@ -294,39 +208,13 @@ class QueueItem:
             download_id=data.get("downloadId", ""),
             download_status=data.get("trackedDownloadStatus", "Unknown"),
             title=data.get("title", "Unknown"),
-            episode=episode,
+            movie=movie,
             protocol=data.get("protocol", "unknown"),
             size=data.get("size", 0),
             size_remaining=data.get("sizeleft", 0),
             status=data.get("status", "Unknown"),
             eta=eta,
             time_remaining=data.get("timeleft", "00:00:00"),
-        )
-
-
-@dataclass(frozen=True)
-class SeriesItem:
-    """Object holding series item information from Radarr."""
-
-    series: Series
-    seasons: List[Season]
-    downloaded: int
-    episodes: int
-    total_episodes: int
-    diskspace: int
-
-    @staticmethod
-    def from_dict(data: dict):
-        """Return QueueItem object from Radarr API response."""
-        seasons = [Season.from_dict(season) for season in data.get("seasons", [])]
-
-        return SeriesItem(
-            series=Series.from_dict(data),
-            seasons=seasons,
-            downloaded=data.get("episodeFileCount", 0),
-            episodes=data.get("episodeCount", 0),
-            total_episodes=data.get("totalEpisodeCount", 0),
-            diskspace=data.get("sizeOnDisk", 0),
         )
 
 
@@ -339,12 +227,12 @@ class WantedResults:
     total: int
     sort_key: str
     sort_dir: str
-    episodes: List[Episode]
+    movies: List[Movie]
 
     @staticmethod
     def from_dict(data: dict):
         """Return WantedResults object from Radarr API response."""
-        episodes = [Episode.from_dict(episode) for episode in data.get("records", [])]
+        movies = [Movie.from_dict(movie) for movie in data.get("records", [])]
 
         return WantedResults(
             page=data.get("page", 0),
@@ -352,7 +240,7 @@ class WantedResults:
             total=data.get("totalRecords", 0),
             sort_key=data.get("sortKey", ""),
             sort_dir=data.get("sortDirection", ""),
-            episodes=episodes,
+            movies=movies
         )
 
 
