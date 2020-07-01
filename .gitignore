@@ -132,3 +132,4 @@ dmypy.json
 .idea/
 .idea/workspace.xml
 .idea/python-radarr.iml
+tests/test_radarr.py
