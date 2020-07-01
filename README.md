@@ -2,6 +2,10 @@
 
 Asynchronous Python client for Radarr API.
 
+This project was derived from [ctalkington/python-sonarr](https://github.com/ctalkington/python-sonarr) (available via pypi/pip)
+
+Since Sonarr and Radarr were created from the same roots, I figured it would be fitting to derive a python client from one to the other.
+
 ## About
 
 This package allows you to monitor a Radarr instance.
